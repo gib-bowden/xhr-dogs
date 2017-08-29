@@ -1,34 +1,43 @@
-//XHR
-var productsRequest = new XMLHttpRequest();
-	productsRequest.addEventListener("load", parseDogs)
-	productsRequest.addEventListener("error", logFailedRequest)
-	productsRequest.open("GET", "dogs.json")
-	productsRequest.send();
+var dogsRequest = new XMLHttpRequest();
+	dogsRequest.addEventListener("load", parseDogs)
+	dogsRequest.addEventListener("error", logFailedRequest)
+	dogsRequest.open("GET", "dogs.json")
+	dogsRequest.send();
 
 
-var categoriesRequest = new XMLHttpRequest();
-	categoriesRequest.addEventListener("load", parseBreeds)
-	categoriesRequest.addEventListener("error", logFailedRequest)
-	categoriesRequest.open("GET", "breeds.json")
-	categoriesRequest.send();
-
-//XHR load functions
 function parseDogs(){
-	dogsData = JSON.parse(this.responseText);
-	dogsArr = dogsData.dogs; 
-	console.log(dogsArr)
+	dogsArr = JSON.parse(this.responseText).dogs;
+	getBreeds(dogsArr)
 }
 
-function parseBreeds(){
-	breedsData = JSON.parse(this.responseText);
-	breedsArr = breedsData.breeds;
-	// createCombinedProductArr(); 
-	// buildDropdownList(categories);
-	// buildProductsList(combinedProductArr);
-	console.log(breedsArr)
-}
+function getBreeds(dogs) {
+	var breedsRequest = new XMLHttpRequest();
+		breedsRequest.addEventListener("load", parseBreeds)
+		breedsRequest.addEventListener("error", logFailedRequest)
+		breedsRequest.open("GET", "breeds.json")
+		breedsRequest.send();
 
+		function parseBreeds(){
+			breedsArr = JSON.parse(this.responseText).breeds;
+			createCombinedArr(dogsArr, breedsArr); 
+		}
+	}
 
 function logFailedRequest(){
 	console.log("request failed");
+}
+
+function createCombinedArr(dogs, breeds) {
+	dogs.forEach((dog) => {
+		var breedId = dog.breed_id;
+		breeds.forEach ((breed) => {
+			if (breedId === breed.id) {
+	            dog["breedName"] = breed.name,
+	            dog["basePrice"] = breed.base_price,
+	            dog["breedDescription"] = breed.description,
+	            dog["totalPrice"] = dog.basePrice + dog["add_on_price"]
+	        }
+		})
+	})
+	console.log(dogs);
 }
